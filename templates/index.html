@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Demand Agents MVP</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4A90E2",
+                        "secondary": "#F5F5F5",
+                        "text-primary": "#333333",
+                        "text-secondary": "#757575",
+                        "accent": "#50E3C2",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-text-primary dark:text-white">
+    <div class="flex h-screen">
+        <!-- SideNavBar -->
+        <div
+            class="w-1/4 bg-secondary dark:bg-background-dark/50 p-6 flex flex-col justify-between border-r border-gray-200 dark:border-gray-700">
+            <div class="flex flex-col gap-8">
+                <div class="flex items-center gap-3">
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12"
+                        data-alt="AI Agent profile picture" style="background-color: #4A90E2;"></div>
+                    <div class="flex flex-col">
+                        <h1 class="text-text-primary dark:text-white text-lg font-bold">Demand Agents</h1>
+                        <p class="text-text-secondary dark:text-gray-400 text-sm">Online</p>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <p
+                        class="text-text-secondary dark:text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
+                        Agents</p>
+                    <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 dark:bg-primary/20 cursor-pointer"
+                        onclick="selectAgent(1)">
+                        <span class="material-symbols-outlined text-primary">work</span>
+                        <p class="text-primary text-base font-medium">Demand Capture</p>
+                    </div>
+                    <div class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-200/50 dark:hover:bg-white/10 cursor-pointer"
+                        onclick="selectAgent(2)">
+                        <span class="material-symbols-outlined text-primary">work</span>
+                        <p class="text-text-primary dark:text-white text-base font-medium">Initial Triage</p>
+                    </div>
+                    <div class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-200/50 dark:hover:bg-white/10 cursor-pointer"
+                        onclick="selectAgent(3)">
+                        <span class="material-symbols-outlined text-primary">work</span>
+                        <p class="text-text-primary dark:text-white text-base font-medium">Create Business Case</p>
+                    </div>
+                </div>
+            </div>
+            <button
+                class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary text-white text-base font-bold tracking-wide shadow-sm hover:bg-primary/90"
+                onclick="startAgent()">
+                <span class="truncate">Start Agent</span>
+            </button>
+        </div>
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- PageHeading -->
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex flex-wrap justify-between items-center gap-3">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-text-primary dark:text-white text-3xl font-bold" id="agent-title">Select an Agent
+                        </p>
+                        <p class="text-text-secondary dark:text-gray-400 text-base" id="agent-description">Choose an
+                            agent from the sidebar to get started.</p>
+                    </div>
+                    <button
+                        class="flex items-center justify-center gap-2 min-w-[84px] max-w-[480px] cursor-pointer overflow-hidden rounded-lg h-10 px-4 bg-accent text-white text-sm font-bold shadow-sm hover:bg-accent/90"
+                        onclick="completeProcess()">
+                        <span class="material-symbols-outlined">description</span>
+                        <span class="truncate">Create Google Doc</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left Column: Chat & Input -->
+                <div class="flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+                    <!-- Chat Interface -->
+                    <div class="flex flex-col h-full bg-secondary dark:bg-background-dark/50 rounded-lg p-4">
+                        <div class="flex-1 space-y-4 overflow-y-auto pr-2" id="chat-messages">
+                            <div class="flex items-end gap-3">
+                                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0"
+                                    data-alt="AI agent avatar" style="background-color: #4A90E2;"></div>
+                                <div class="flex flex-1 flex-col gap-1 items-start">
+                                    <p class="text-text-secondary dark:text-gray-400 text-xs font-medium">System • <span
+                                            id="current-time"></span></p>
+                                    <p
+                                        class="text-base font-normal leading-normal flex max-w-sm rounded-lg px-4 py-3 bg-white dark:bg-gray-700 text-text-primary dark:text-white shadow-sm">
+                                        Welcome! Please select an agent from the sidebar and click "Start Agent" to
+                                        begin.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Composer -->
+                        <div class="mt-4">
+                            <div class="flex items-center gap-3">
+                                <label class="flex flex-col min-w-40 h-12 flex-1">
+                                    <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                                        <input
+                                            class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-white dark:bg-gray-700 h-full placeholder:text-text-secondary dark:placeholder:text-gray-400 px-4 text-base font-normal"
+                                            placeholder="Type your message..." id="chat-input" />
+                                        <div
+                                            class="flex border-none bg-white dark:bg-gray-700 items-center justify-center pr-2 rounded-r-lg">
+                                            <div class="flex items-center gap-1">
+                                                <button
+                                                    class="flex items-center justify-center p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                                                    onclick="uploadFile()">
+                                                    <span
+                                                        class="material-symbols-outlined text-text-secondary dark:text-gray-400 text-xl">attach_file</span>
+                                                </button>
+                                                <button
+                                                    class="flex items-center justify-center p-2 rounded-full bg-primary text-white hover:bg-primary/90"
+                                                    onclick="sendChat()">
+                                                    <span class="material-symbols-outlined text-xl">send</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right Column: Form & Upload -->
+                <div class="flex flex-col gap-6">
+                    <!-- Manual Input Form -->
+                    <div class="bg-secondary dark:bg-background-dark/50 rounded-lg p-6">
+                        <h3 class="text-lg font-bold text-text-primary dark:text-white mb-4">Manual Input</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary dark:text-gray-400"
+                                    for="project-name">Project Name</label>
+                                <input
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-primary focus:ring-primary text-text-primary dark:text-white"
+                                    id="project-name" type="text" placeholder="Project Name" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary dark:text-gray-400"
+                                    for="milestone-dates">Targeted Milestone Dates</label>
+                                <input
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-primary focus:ring-primary text-text-primary dark:text-white"
+                                    id="milestone-dates" type="text" placeholder="Targeted Milestone Dates" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary dark:text-gray-400"
+                                    for="business-problem">Business Problem/Opportunity</label>
+                                <textarea
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-primary focus:ring-primary text-text-primary dark:text-white"
+                                    id="business-problem" rows="3"
+                                    placeholder="Business Problem/Opportunity"></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                                <button
+                                    class="flex items-center justify-center gap-2 min-w-[84px] cursor-pointer overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary/90"
+                                    type="button" onclick="sendForm()">
+                                    Send Form Data
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Document Upload Section -->
+                    <div class="bg-secondary dark:bg-background-dark/50 rounded-lg p-6">
+                        <h3 class="text-lg font-bold text-text-primary dark:text-white mb-4">Document Upload</h3>
+                        <div class="flex items-center justify-center w-full">
+                            <label
+                                class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                for="file-upload">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <span
+                                        class="material-symbols-outlined text-4xl text-text-secondary dark:text-gray-400">cloud_upload</span>
+                                    <p class="mb-2 text-sm text-text-secondary dark:text-gray-400"><span
+                                            class="font-semibold">Click to upload</span> or drag and drop</p>
+                                    <p class="text-xs text-text-secondary dark:text-gray-400">PDF, DOCX, or XLSX (MAX.
+                                        10MB)</p>
+                                </div>
+                                <input class="hidden" id="file-upload" type="file" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let threadId, agentId, selectedAgentType = 1;
+
+        // Set current time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        function selectAgent(type) {
+            selectedAgentType = type;
+
+            // Update UI to show selected agent
+            document.querySelectorAll('.flex.items-center.gap-3.px-4.py-3.rounded-lg').forEach(el => {
+                el.classList.remove('bg-primary/10', 'dark:bg-primary/20');
+                el.querySelector('.material-symbols-outlined').classList.remove('text-primary');
+                el.querySelector('.material-symbols-outlined').classList.add('text-text-secondary', 'dark:text-gray-400');
+                el.querySelector('p').classList.remove('text-primary');
+                el.querySelector('p').classList.add('text-text-primary', 'dark:text-white');
+            });
+
+            // Highlight selected agent
+            const selectedEl = document.querySelector(`.flex.items-center.gap-3.px-4.py-3.rounded-lg:nth-child(${parseInt(type) + 1})`);
+            selectedEl.classList.add('bg-primary/10', 'dark:bg-primary/20');
+            selectedEl.querySelector('.material-symbols-outlined').classList.remove('text-text-secondary', 'dark:text-gray-400');
+            selectedEl.querySelector('.material-symbols-outlined').classList.add('text-primary');
+            selectedEl.querySelector('p').classList.remove('text-text-primary', 'dark:text-white');
+            selectedEl.querySelector('p').classList.add('text-primary');
+
+            // Update agent title and description
+            const titles = {
+                1: "Demand Capture",
+                2: "Initial Triage",
+                3: "Create Business Case"
+            };
+
+            const descriptions = {
+                1: "I can help capture and analyze demand data.",
+                2: "I can perform initial triage of incoming requests.",
+                3: "I can help create comprehensive business cases."
+            };
+
+            document.getElementById('agent-title').textContent = titles[type];
+            document.getElementById('agent-description').textContent = descriptions[type];
+        }
+
+        // Initialize with first agent selected
+        selectAgent(1);
+
+        async function startAgent() {
+            const type = selectedAgentType;
+            const res = await fetch('/select_agent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type })
+            });
+            const data = await res.json();
+            threadId = data.thread_id;
+            agentId = data.agent_id;
+
+            // Add message to chat
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-end gap-3';
+            messageDiv.innerHTML = `
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" data-alt="AI agent avatar" style="background-color: #4A90E2;"></div>
+                <div class="flex flex-1 flex-col gap-1 items-start">
+                    <p class="text-text-secondary dark:text-gray-400 text-xs font-medium">System • ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p class="text-base font-normal leading-normal flex max-w-sm rounded-lg px-4 py-3 bg-white dark:bg-gray-700 text-text-primary dark:text-white shadow-sm">Agent started! You can now chat or upload.</p>
+                </div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendChat() {
+            const message = document.getElementById('chat-input').value;
+            if (!message) return;
+
+            // Add user message to chat
+            const chatMessages = document.getElementById('chat-messages');
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'flex items-end gap-3 justify-end';
+            userMessageDiv.innerHTML = `
+                <div class="flex flex-1 flex-col gap-1 items-end">
+                    <p class="text-text-secondary dark:text-gray-400 text-xs font-medium">You • ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p class="text-base font-normal leading-normal flex max-w-sm rounded-lg px-4 py-3 bg-primary text-white shadow-sm">${message}</p>
+                </div>
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" data-alt="User avatar" style="background-color: #50E3C2;"></div>
+            `;
+            chatMessages.appendChild(userMessageDiv);
+
+            // Clear input
+            document.getElementById('chat-input').value = '';
+
+            // Add agent response placeholder
+            const responseId = 'agent-response-' + Date.now();
+
+            const agentMessageDiv = document.createElement('div');
+            agentMessageDiv.className = 'flex items-end gap-3';
+            agentMessageDiv.innerHTML = `
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" data-alt="AI agent avatar" style="background-color: #4A90E2;"></div>
+                <div class="flex flex-1 flex-col gap-1 items-start">
+                    <p class="text-text-secondary dark:text-gray-400 text-xs font-medium">Agent • ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p class="text-base font-normal leading-normal flex max-w-sm rounded-lg px-4 py-3 bg-white dark:bg-gray-700 text-text-primary dark:text-white shadow-sm" id=${responseId}>
+                        <span class="material-symbols-outlined animate-spin text-primary">progress_activity</span>
+                    </p>
+                </div>
+            `;
+            chatMessages.appendChild(agentMessageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Send request to server
+            const res = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            if (!res.ok) {
+                document.getElementById(responseId).textContent = `Error: ${res.statusText}`;
+                return;
+            }
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let done = false;
+            let agentResponse = '';
+
+            while (!done) {
+                const { value, done: readerDone } = await reader.read();
+                done = readerDone;
+                if (value) {
+                    let chunk = decoder.decode(value);
+                    // Parse SSE-like data (strip 'data: ' and handle [DONE])
+                    chunk = chunk.replace(/^data: /gm, '').trim();
+                    if (chunk === '[DONE]') {
+                        // Response complete
+                    } else if (chunk.startsWith('Error:')) {
+                        agentResponse += `\n${chunk}`;
+                        document.getElementById(responseId).textContent = agentResponse;
+                    } else {
+                        agentResponse += chunk;
+                        document.getElementById(responseId).textContent = agentResponse;
+                    }
+                }
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendForm() {
+            const formData = {
+                project_name: document.getElementById('project-name').value,
+                milestone_dates: document.getElementById('milestone-dates').value,
+                business_problem: document.getElementById('business-problem').value
+                // Add more fields as needed
+            };
+            const message = `Form data: ${JSON.stringify(formData)}`;
+            document.getElementById('chat-input').value = message;
+            sendChat();
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('file-upload');
+            if (!fileInput.files.length) {
+                fileInput.click();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            const res = await fetch('/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            // Add upload message to chat
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-end gap-3';
+            messageDiv.innerHTML = `
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" data-alt="AI agent avatar" style="background-color: #4A90E2;"></div>
+                <div class="flex flex-1 flex-col gap-1 items-start">
+                    <p class="text-text-secondary dark:text-gray-400 text-xs font-medium">System • ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p class="text-base font-normal leading-normal flex max-w-sm rounded-lg px-4 py-3 bg-white dark:bg-gray-700 text-text-primary dark:text-white shadow-sm">Upload: ${data.status}<br>Agent: ${data.response}</p>
+                </div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Reset file input
+            fileInput.value = '';
+        }
+
+        async function completeProcess() {
+            const res = await fetch('/complete', { method: 'POST' });
+            const data = await res.json();
+
+            // Add completion message to chat
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-end gap-3';
+
+            if (data.error) {
+                messageDiv.innerHTML = `
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" data-alt="AI agent avatar" style="background-color: #4A90E2;"></div>
+                    <div class="flex flex-1 flex-col gap-1 items-start">
+                        <p class="text-text-secondary dark:text-gray-400 text-xs font-medium">System • ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p class="text-base font-normal leading-normal flex max-w-sm rounded-lg px-4 py-3 bg-white dark:bg-gray-700 text-text-primary dark:text-white shadow-sm">Error: ${data.error}</p>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" data-alt="AI agent avatar" style="background-color: #4A90E2;"></div>
+                    <div class="flex flex-1 flex-col gap-1 items-start">
+                        <p class="text-text-secondary dark:text-gray-400 text-xs font-medium">System • ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p class="text-base font-normal leading-normal flex max-w-sm rounded-lg px-4 py-3 bg-white dark:bg-gray-700 text-text-primary dark:text-white shadow-sm">Google Doc created: <a href="${data.doc_url}" class="text-primary underline" target="_blank">${data.doc_url}</a></p>
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Enable Enter key to send chat
+        document.getElementById('chat-input').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendChat();
+            }
+        });
+    </script>
+</body>
+
+</html>
