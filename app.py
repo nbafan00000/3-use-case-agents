@@ -30,27 +30,30 @@ SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/a
 def get_credentials():
     creds = None
 
-    # Try to load token from environment variable (for Render)
+    # 1️⃣ Try to load token from Render environment variable (secure, headless)
     token_b64 = os.environ.get('TOKEN_PICKLE_B64')
     if token_b64:
         creds = pickle.load(io.BytesIO(base64.b64decode(token_b64)))
-    # Fallback: try to load token.pickle file locally
+
+    # 2️⃣ Fallback: load local token.pickle (for local development)
     elif os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token_file:
             creds = pickle.load(token_file)
 
-    # If no valid credentials, generate new ones
+    # 3️⃣ If no valid credentials, refresh or generate
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            # Use console flow on Render instead of run_local_server
+            # Headless Render environment uses console-based flow
             if os.environ.get('RENDER') == "1":
                 creds = flow.run_console()
             else:
+                # Local development uses browser flow
                 creds = flow.run_local_server(port=0)
-        # Save locally (useful for local development)
+
+        # Save token locally for future local runs
         with open('token.pickle', 'wb') as token_file:
             pickle.dump(creds, token_file)
 
