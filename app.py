@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, session
 from flask import Response, stream_with_context
 from openai import OpenAI
-import os
+import os, base64
 from dotenv import load_dotenv
 import time
 from datetime import date
@@ -29,18 +29,46 @@ SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/a
 
 def get_credentials():
     creds = None
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
+
+    # Try to load token from environment variable (for Render)
+    token_b64 = os.environ.get('TOKEN_PICKLE_B64')
+    if token_b64:
+        creds = pickle.load(io.BytesIO(base64.b64decode(token_b64)))
+    # Fallback: try to load token.pickle file locally
+    elif os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token_file:
+            creds = pickle.load(token_file)
+
+    # If no valid credentials, generate new ones
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
+            # Use console flow on Render instead of run_local_server
+            if os.environ.get('RENDER') == "1":
+                creds = flow.run_console()
+            else:
+                creds = flow.run_local_server(port=0)
+        # Save locally (useful for local development)
+        with open('token.pickle', 'wb') as token_file:
+            pickle.dump(creds, token_file)
+
     return creds
+# def get_credentials():
+#     creds = None
+#     if os.path.exists('token.pickle'):
+#         with open('token.pickle', 'rb') as token:
+#             creds = pickle.load(token)
+#     if not creds or not creds.valid:
+#         if creds and creds.expired and creds.refresh_token:
+#             creds.refresh(Request())
+#         else:
+#             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+#             creds = flow.run_local_server(port=0)
+#         with open('token.pickle', 'wb') as token:
+#             pickle.dump(creds, token)
+#     return creds
 
 creds = get_credentials()
 drive_service = build('drive', 'v3', credentials=creds)
