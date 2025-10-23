@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, session
 from flask import Response, stream_with_context
 from openai import OpenAI
-import os, base64
+import os, base64, io
 from dotenv import load_dotenv
 import time
 from datetime import date
