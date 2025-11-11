@@ -20,9 +20,9 @@ app.secret_key = 'super_secret_key'  # For session
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 AGENT_IDS = {
-    '1': 'asst_QLzsCtwgJDzcPWTf4FVpVt8q',  # Replace with actual
-    '2': 'asst_8onKwY0XOHcshizOLuEGgOHU',
-    '3': 'asst_43nQoLPoAIk3p8CV7D2zauId'
+    '1': 'asst_m72xtQPOwXuvm8KGbRg3d0Ap',  # Replace with actual
+    '2': 'asst_vurqHzBBLmZAw9PUeJ5Q3pSm',
+    '3': 'asst_QuXVyif9joj15sLR0Ja5Ij1F'
 }
 
 SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/documents']
@@ -58,24 +58,10 @@ def get_credentials():
             pickle.dump(creds, token_file)
 
     return creds
-# def get_credentials():
-#     creds = None
-#     if os.path.exists('token.pickle'):
-#         with open('token.pickle', 'rb') as token:
-#             creds = pickle.load(token)
-#     if not creds or not creds.valid:
-#         if creds and creds.expired and creds.refresh_token:
-#             creds.refresh(Request())
-#         else:
-#             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-#             creds = flow.run_local_server(port=0)
-#         with open('token.pickle', 'wb') as token:
-#             pickle.dump(creds, token)
-#     return creds
 
-creds = get_credentials()
-drive_service = build('drive', 'v3', credentials=creds)
-docs_service = build('docs', 'v1', credentials=creds)
+# creds = get_credentials()
+# drive_service = build('drive', 'v3', credentials=creds)
+# docs_service = build('docs', 'v1', credentials=creds)
 
 @app.route('/')
 def index():
@@ -114,56 +100,6 @@ def chat():
             break
         time.sleep(1)
     return response
-# def chat():
-#     data = request.json
-#     thread_id = session.get('thread_id')
-#     agent_id = session.get('agent_id')
-#     if not thread_id or not agent_id:
-#         return jsonify({'error': 'Please start an agent first before chatting.'}), 400
-
-#     # Add user message
-#     client.beta.threads.messages.create(thread_id=thread_id, role='user', content=data['message'])
-
-#     # Create run
-#     run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=agent_id)
-
-#     def generate():
-#         last_content = ''
-#         while True:
-#             run_status = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-#             if run_status.status == 'completed':
-#                 messages = client.beta.threads.messages.list(thread_id=thread_id, order='asc')
-#                 assistant_messages = [msg for msg in messages.data if msg.role == 'assistant']
-#                 if assistant_messages:
-#                     current_content = assistant_messages[-1].content[0].text.value
-#                     # Yield only new content (incremental diff)
-#                     new_content = current_content[len(last_content):]
-#                     if new_content:
-#                         yield f"data: {new_content}\n\n"
-#                     last_content = current_content
-#                 yield "data: [DONE]\n\n"
-#                 break
-#             elif run_status.status in ['failed', 'cancelled', 'expired']:
-#                 yield f"data: Error: Run {run_status.status}\n\n"
-#                 break
-#             time.sleep(0.5)  # Poll interval; adjust to 0.2 for faster if needed
-
-#     return Response(stream_with_context(generate()), mimetype='text/event-stream')
-# def chat():
-#     data = request.json
-#     thread_id = session.get('thread_id')
-#     agent_id = session.get('agent_id')
-#     if not thread_id or not agent_id:
-#         return jsonify({'error': 'Please start an agent first before chatting.'}), 400
-
-#     # Add user message
-#     client.beta.threads.messages.create(thread_id=thread_id, role='user', content=data['message'])
-
-#     # Create run and store its ID in session for streaming
-#     run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=agent_id)
-#     session['run_id'] = run.id
-
-#     return jsonify({'status': 'Stream started'})
 
 
 @app.route('/stream', methods=['GET'])
